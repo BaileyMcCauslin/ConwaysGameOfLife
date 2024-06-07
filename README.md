@@ -1,0 +1,3 @@
+# Conway's Game Of Life
+
+> This is a simple implementation of [Conway's Game Of Life](https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life), a fascinating cellular automaton. The evolution of this system is solely dependent on its initial state, leading to mesmerizing patterns and behaviors. Notably, within Conway's Game Of Life, ingenious creations like a [Turing Machine](https://en.wikipedia.org/wiki/Turing_machine) have been simulated, showcasing the remarkable versatility of this system. In this implementation, you can click on the tiles to initalize the initial state and then when you press start the magic happens.

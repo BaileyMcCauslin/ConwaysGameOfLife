@@ -1,4 +1,4 @@
-from tkinter import *
+import tkinter as tk
 
 class ConwaysGameOfLife:
     def __init__(self,board_size,gui,time_step):
@@ -7,12 +7,15 @@ class ConwaysGameOfLife:
         self.time_step = time_step
         self.game_state = {}
         
-        self.start_btn = Button(self.gui.root, text="Start")
+        self.start_btn = tk.Button(self.gui.root, text="Start")
         self.start_btn.pack(pady=10)
-        self.gui.canvas.pack(fill=BOTH, expand=True)
+        self.gui.canvas.pack(fill=tk.BOTH, expand=True)
         
         self.start_btn.configure(command=self.start_click)
 
+        self.generation = 0
+        self.population = 0 
+        
     def create_string_key(self,pos):
         row, col = pos
         return f"{row}x{col}"
@@ -30,7 +33,8 @@ class ConwaysGameOfLife:
         return game_state
 
     def get_neighbor_cells(self,pos):
-        offsets = [(1,0),(0,1),(1,1),(1,-1),(-1,1),(-1,-1),(0,-1),(-1,0)]
+        offsets = [(1,0),(0,1),(1,1),(1,-1),
+                   (-1,1),(-1,-1),(0,-1),(-1,0)]
         row,col = pos
         new_indices = []
         for offset_tuple in offsets:
@@ -59,33 +63,56 @@ class ConwaysGameOfLife:
             self.gui.root.update()
 
     def get_coords_from_key(self,key):  
-        new_str = key.split('x')
-        return (int(new_str[0]),int(new_str[1]))
+        row,col = key.split('x')
+        return (int(row),int(col))
+    
+    def get_population(self):
+        population = 0
+        for entry in self.game_state:
+            if self.game_state[entry]:
+                population+=1
+        return population
+    
+    def update_game_stats(self):
+        self.generation += 1
+        self.population= self.get_population()
 
+        # TODO: Implement on the GUI
+        print(f"Generation: {self.generation}")
+        print(f"Population: {self.population}")
+
+    def check_for_cell_death(self,living_neighbors):
+        return living_neighbors < 2 or living_neighbors > 3
+    
+    def set_cell_color(self,id,color):
+        self.gui.canvas.itemconfig(id, fill=color) 
+
+    # TODO: We can just loop through changed cells 
     def game(self):
+        self.update_game_stats()
         new_state = {}
         for current_cell_key in self.game_state:
             current_cell = self.get_coords_from_key(current_cell_key)
             neighboring_cells = self.get_neighbor_cells(current_cell)
             cell_state = self.game_state[current_cell_key]
 
-            living_neighbors = self.check_living_neighbors(
-                                                            neighboring_cells)
+            living_neighbors = self.check_living_neighbors(neighboring_cells)
 
             cell_id = self.gui.cell_ids[current_cell_key]
+            
             if cell_state:
-                if living_neighbors < 2 or living_neighbors > 3:
+                if self.check_for_cell_death(living_neighbors):
                     new_state[current_cell_key] = False
-                    self.gui.canvas.itemconfig(cell_id, fill="white")
+                    self.set_cell_color(cell_id,"white")
             else:
                 if living_neighbors == 3:
                     new_state[current_cell_key] = True
-                    self.gui.canvas.itemconfig(cell_id, fill="black") 
+                    self.set_cell_color(cell_id,"black")
 
         for item in new_state:
             self.game_state[item] = new_state[item]
 
     def start_click(self):
         self.gui.click_enabled = False
-        self.start_btn.config(state=DISABLED)
+        self.start_btn.config(state=tk.DISABLED)
         self.run_game()
